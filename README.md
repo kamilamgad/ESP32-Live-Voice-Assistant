@@ -1,19 +1,28 @@
 # ESP32 Live Voice Assistant
 
-`ESP32 Live Voice Assistant` is a hardware-plus-software voice assistant system built around an ESP32 audio front end and a local PC server for wake detection, transcription, tool execution, and spoken replies.
+`ESP32 Live Voice Assistant` is a hardware-plus-software voice assistant system built around an ESP32 audio front end and a local PC server for wake detection, transcription, task execution, and spoken replies.
 
-This project is not just a chatbot wrapped in a microphone. It combines:
+This is not just a chatbot connected to a microphone. It combines:
 
 - embedded hardware wiring
+- firmware development
 - real-time audio capture and transport
 - wake phrase detection
 - speech-to-text
 - local skill routing
 - Codex task execution
 - text-to-speech synthesis
-- response audio playback back on the device
+- speaker playback back on the device
 
-The result is a practical voice workflow where an ESP32 with a microphone and speaker can stay always on, listen for a wake phrase, send the spoken request to a local server, and speak the assistant response back through the connected amplifier and speaker.
+The result is a practical physical assistant workflow where an ESP32 with a microphone and speaker can stay always on, listen for a wake phrase, send the spoken request to a local server, and play the assistant response back through the connected amplifier and speaker.
+
+## Quick Summary
+
+- ESP32 audio endpoint with live microphone capture
+- INMP441 microphone + MAX98357A amplifier + speaker wiring
+- local server for wake detection, STT, skills, and Codex routing
+- Piper voice synthesis for spoken replies
+- response audio sent back to the ESP32 for playback
 
 ## Why This Project Is Interesting
 
@@ -27,7 +36,7 @@ This project crosses multiple layers that are usually separate:
 - tool orchestration
 - local automation
 
-It was built to move beyond “AI in a browser tab” into a real physical assistant workflow.
+It was built to move beyond "AI in a browser tab" into a real hardware-backed assistant workflow.
 
 ## What I Built
 
@@ -89,6 +98,44 @@ This repo is split into two major parts:
   ESP32 firmware for microphone capture, transport, polling, and speaker playback
 - `pc_server/`
   FastAPI backend for wake detection, STT, skills, Codex routing, and TTS
+
+### System Diagram
+
+```mermaid
+flowchart LR
+    Mic[INMP441 Microphone] --> ESP32[ESP32 Firmware]
+    ESP32 -->|PCM audio over Wi-Fi| Server[PC Server / FastAPI]
+    Server --> Wake[Wake Phrase Detection]
+    Wake --> STT[Speech-to-Text]
+    STT --> Router[Skills + Codex Routing]
+    Router --> TTS[Piper Text-to-Speech]
+    TTS -->|Reply audio| ESP32
+    ESP32 --> Amp[MAX98357A Amplifier]
+    Amp --> Speaker[Speaker Output]
+```
+
+### Runtime Pipeline
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Device as ESP32 Device
+    participant Server as Local PC Server
+    participant Agent as Skills/Codex
+    participant TTS as Piper
+
+    User->>Device: Speaks wake phrase and command
+    Device->>Server: Streams microphone PCM
+    Server->>Server: Detect wake phrase
+    Server->>Server: Capture spoken request
+    Server->>Server: Transcribe request
+    Server->>Agent: Route to skill or Codex
+    Agent-->>Server: Response text
+    Server->>TTS: Synthesize reply audio
+    TTS-->>Server: PCM reply audio
+    Server-->>Device: Reply audio
+    Device-->>User: Plays assistant response
+```
 
 ## Stack
 
@@ -163,6 +210,16 @@ Then fill in:
 
 Open `firmware/assistant_client/assistant_client.ino` in Arduino IDE and upload it to the ESP32.
 
+## Example Interaction
+
+1. User says: `Hey Dobby`
+2. Device streams live microphone audio to the server
+3. Server detects the wake phrase and starts command capture
+4. User says: `What is the weather in Richmond tomorrow?`
+5. Server transcribes the request and routes it to the weather skill
+6. Server generates a spoken answer
+7. ESP32 plays the response through the amplifier and speaker
+
 ## Runtime Flow
 
 1. ESP32 continuously captures mono `16 kHz` PCM
@@ -172,6 +229,18 @@ Open `firmware/assistant_client/assistant_client.ino` in Arduino IDE and upload 
 5. The request is routed into skills, direct assistant behavior, or Codex task execution
 6. The reply text is synthesized into audio
 7. The ESP32 fetches and plays the reply through the amplifier and speaker
+
+## Why The Design Matters
+
+The project is intentionally split this way because the ESP32 is a good always-on audio endpoint, while the PC is better suited for:
+
+- faster transcription
+- wakeword experimentation
+- task routing and tool use
+- running Codex
+- generating higher quality speech output
+
+That separation lets the device stay lightweight while the heavier logic runs on the computer.
 
 ## Why It Is More Than A Simple Demo
 
