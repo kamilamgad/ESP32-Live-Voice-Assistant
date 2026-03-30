@@ -181,6 +181,7 @@ This project required work across several layers at once:
 - wiring the mic, amp, and speaker correctly
 - handling real PCM streaming instead of one-shot uploads
 - coordinating embedded firmware with a Python backend
+- training a custom wakeword model using more than 100 self-recorded positive and negative audio samples
 - tuning wake and silence behavior
 - integrating local automation through Codex
 - managing reply synthesis and playback back on the device
