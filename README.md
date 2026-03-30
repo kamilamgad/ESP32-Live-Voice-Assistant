@@ -1,25 +1,92 @@
 # ESP32 Live Voice Assistant
 
-`ESP32 Live Voice Assistant` is a hybrid voice assistant project that uses an ESP32 as the always-on audio front end and a PC server for wake detection, transcription, task execution, and spoken replies.
+`ESP32 Live Voice Assistant` is a hardware-plus-software voice assistant system built around an ESP32 audio front end and a local PC server for wake detection, transcription, tool execution, and spoken replies.
 
-The goal is practical voice control, not just speech-to-text. The device streams microphone audio from ESP32 hardware to a local server, waits for a wake phrase, captures the spoken request, routes the request into Codex or utility skills, and returns assistant speech back to the ESP32 for playback.
+This project is not just a chatbot wrapped in a microphone. It combines:
 
-## What It Does
+- embedded hardware wiring
+- real-time audio capture and transport
+- wake phrase detection
+- speech-to-text
+- local skill routing
+- Codex task execution
+- text-to-speech synthesis
+- response audio playback back on the device
 
-- streams live microphone PCM from ESP32 hardware to a PC server
-- listens for a wake phrase such as `hey dobby`
-- captures the user command after wake detection
-- supports command routing to `codex exec` for local tasks
-- supports local skills such as time, weather, and lightweight research
-- generates assistant voice responses with Piper
-- sends reply audio back to the ESP32 for playback
+The result is a practical voice workflow where an ESP32 with a microphone and speaker can stay always on, listen for a wake phrase, send the spoken request to a local server, and speak the assistant response back through the connected amplifier and speaker.
+
+## Why This Project Is Interesting
+
+This project crosses multiple layers that are usually separate:
+
+- hardware integration
+- firmware development
+- local networking
+- streaming audio handling
+- speech processing
+- tool orchestration
+- local automation
+
+It was built to move beyond “AI in a browser tab” into a real physical assistant workflow.
+
+## What I Built
+
+This system includes both the physical device layer and the software stack behind it.
+
+### Hardware Side
+
+I wired and configured:
+
+- an `ESP32`
+- an `INMP441` microphone
+- a `MAX98357A` amplifier
+- a speaker output chain
+
+That hardware setup lets the ESP32 act as an always-on audio endpoint:
+
+- microphone input for listening
+- network transport to the server
+- speaker playback for assistant replies
+
+Shared-clock wiring used in this setup:
+
+- `GPIO14` -> microphone `SCK` and amplifier `BCLK`
+- `GPIO15` -> microphone `WS` and amplifier `LRC`
+- `GPIO32` <- microphone `SD`
+- `GPIO22` -> amplifier `DIN`
+
+### Software Side
+
+On the software side, I built a multi-stage voice pipeline that:
+
+1. captures live PCM audio on the ESP32
+2. streams audio from the ESP32 to a local PC server
+3. listens for a wake phrase such as `hey dobby`
+4. captures the spoken command after wake detection
+5. routes the request to:
+   - Codex for local actionable tasks, or
+   - built-in utility skills such as time, weather, and lightweight research
+6. generates spoken assistant output with Piper
+7. sends reply audio back to the ESP32 for playback through the amp and speaker
+
+## Core Capabilities
+
+- always-on ESP32 audio front end
+- live microphone PCM streaming to a local backend
+- wake phrase detection
+- speech-to-text with `faster-whisper`
+- optional custom wakeword model support
+- Codex-based task execution
+- local skills engine
+- text-to-speech reply generation with Piper
+- speaker playback of assistant responses
 
 ## Architecture
 
-This project is split into two parts:
+This repo is split into two major parts:
 
 - `firmware/assistant_client/`
-  ESP32 firmware for microphone capture, streaming, polling, and audio playback
+  ESP32 firmware for microphone capture, transport, polling, and speaker playback
 - `pc_server/`
   FastAPI backend for wake detection, STT, skills, Codex routing, and TTS
 
@@ -31,22 +98,7 @@ This project is split into two parts:
 - optional `openWakeWord` / custom sklearn wakeword model support
 - Groq API support for STT/chat fallback
 - Piper for text-to-speech
-- Codex CLI for actionable local task execution
-
-## Hardware
-
-The current setup is built around:
-
-- ESP32
-- INMP441 microphone
-- MAX98357A amplifier
-
-Shared-clock wiring used in this project:
-
-- `GPIO14` -> mic `SCK` and amp `BCLK`
-- `GPIO15` -> mic `WS` and amp `LRC`
-- `GPIO32` <- mic `SD`
-- `GPIO22` -> amp `DIN`
+- Codex CLI for local task execution
 
 ## Repo Layout
 
@@ -114,21 +166,26 @@ Open `firmware/assistant_client/assistant_client.ino` in Arduino IDE and upload 
 ## Runtime Flow
 
 1. ESP32 continuously captures mono `16 kHz` PCM
-2. ESP32 streams PCM frames to the PC server
-3. PC listens for the wake phrase
-4. After wake detection, the server captures the user command
-5. The command is handled by:
-   - Codex for local tasks, or
-   - built-in skills / direct assistant handling
-6. Piper synthesizes the spoken reply
-7. ESP32 fetches and plays only the assistant response audio
+2. ESP32 streams audio frames to the local server
+3. The server checks for the wake phrase
+4. After wake detection, it captures the spoken request
+5. The request is routed into skills, direct assistant behavior, or Codex task execution
+6. The reply text is synthesized into audio
+7. The ESP32 fetches and plays the reply through the amplifier and speaker
 
-## Notes
+## Why It Is More Than A Simple Demo
 
-- This is designed as a local-first assistant architecture
-- The user's speech is not intended to be played back to the speaker in the final workflow
-- Wakeword reliability can be improved further with a stronger dedicated wakeword model
-- WebSocket streaming would be a cleaner future transport than the current HTTP chunk flow
+This project required work across several layers at once:
+
+- getting the ESP32 microphone and speaker chain working reliably
+- wiring the mic, amp, and speaker correctly
+- handling real PCM streaming instead of one-shot uploads
+- coordinating embedded firmware with a Python backend
+- tuning wake and silence behavior
+- integrating local automation through Codex
+- managing reply synthesis and playback back on the device
+
+That makes it a much more complete systems project than a typical single-layer AI demo.
 
 ## Privacy
 
