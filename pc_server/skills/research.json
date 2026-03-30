@@ -1,0 +1,15 @@
+{
+  "id": "research_lookup",
+  "description": "Fetch quick web research snippets for general information queries.",
+  "handler": "research",
+  "enabled": true,
+  "triggers": [
+    "research",
+    "look up",
+    "latest on",
+    "news on",
+    "find information",
+    "who is",
+    "what is"
+  ]
+}

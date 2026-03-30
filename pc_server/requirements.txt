@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+numpy
+faster-whisper
+openwakeword
+httpx

@@ -1,0 +1,15 @@
+{
+  "id": "time_lookup",
+  "description": "Get the current time/date for local or requested location.",
+  "handler": "time",
+  "enabled": true,
+  "triggers": [
+    "what time",
+    "current time",
+    "time right now",
+    "what day is it",
+    "what date is it",
+    "tell me the time",
+    "tell me the date"
+  ]
+}

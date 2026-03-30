@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Local config and secrets
+pc_server/.env
+firmware/**/config.h
+
+# Local models, binaries, generated data
+voices/
+tools/piper/
+pc_server/data/
+
+# Temp and runtime output
+tmp/
+*.log
+pc_server/*.log
+
+# OS/editor
+Thumbs.db
+.DS_Store

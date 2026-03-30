@@ -1,0 +1,15 @@
+{
+  "id": "weather_lookup",
+  "description": "Get current weather conditions for a requested location.",
+  "handler": "weather",
+  "enabled": true,
+  "triggers": [
+    "weather",
+    "temperature",
+    "forecast",
+    "is it raining",
+    "is it snowing",
+    "how hot",
+    "how cold"
+  ]
+}
